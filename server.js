@@ -4,7 +4,7 @@ const PORT = process.env.PORT || 3001;
 const { animals } = require('./data/animals.json');
 
 app.listen(PORT, () => {
-    console.log("APi is listening on port " + PORT);
+    console.log(`API server now on port ${PORT}!`);
 });
 
 var filterByQuery = function (query, animalsArray) {
