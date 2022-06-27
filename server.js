@@ -5,27 +5,25 @@ const path = require('path');
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static('public'));
 
 const PORT = process.env.PORT || 3001;
 const { animals } = require('./data/animals.json');
 
-app.listen(PORT, () => {
-    console.log(`API server now on port ${PORT}!`);
-});
 
 var filterByQuery = function (query, animalsArray) {
     let personalityTraitsArray = [];
     // Note that we save the animalsArray as filteredResults here:
     let filteredResults = animalsArray;
     if (query.personalityTraits) {
-      // Save personalityTraits as a dedicated array.
-      // If personalityTraits is a string, place it into a new array and save.
+        // Save personalityTraits as a dedicated array.
+        // If personalityTraits is a string, place it into a new array and save.
       if (typeof query.personalityTraits === 'string') {
         personalityTraitsArray = [query.personalityTraits];
-      } else {
+    } else {
         personalityTraitsArray = query.personalityTraits;
-      }
-      // Loop through each trait in the personalityTraits array:
+    }
+    // Loop through each trait in the personalityTraits array:
       personalityTraitsArray.forEach(trait => {
         // Check the trait against each animal in the filteredResults array.
         // Remember, it is initially a copy of the animalsArray,
@@ -35,18 +33,18 @@ var filterByQuery = function (query, animalsArray) {
         // so at the end we'll have an array of animals that have every one 
         // of the traits when the .forEach() loop is finished.
         filteredResults = filteredResults.filter(
-          animal => animal.personalityTraits.indexOf(trait) !== -1
-        );
-      });
+            animal => animal.personalityTraits.indexOf(trait) !== -1
+            );
+        });
     }
     if (query.diet) {
-      filteredResults = filteredResults.filter(animal => animal.diet === query.diet);
+        filteredResults = filteredResults.filter(animal => animal.diet === query.diet);
     }
     if (query.species) {
-      filteredResults = filteredResults.filter(animal => animal.species === query.species);
+        filteredResults = filteredResults.filter(animal => animal.species === query.species);
     }
     if (query.name) {
-      filteredResults = filteredResults.filter(animal => animal.name === query.name);
+        filteredResults = filteredResults.filter(animal => animal.name === query.name);
     }
     // return the filtered results:
     return filteredResults;
@@ -62,17 +60,17 @@ var createNewAnimal = function (body, animalsArray) {
     // main function code will go below
     const animal = body;
     animalsArray.push(animal);
-
+    
     fs.writeFileSync(
         path.join(__dirname, './data/animals.json'),
         JSON.stringify({ animals: animalsArray }, null, 2)
-    )
-
-    return animal;
-}
-
-var validateAnimal = function (animal) {
-    if (!animal.name || typeof animal.name !== 'string') {
+        )
+        
+        return animal;
+    }
+    
+    var validateAnimal = function (animal) {
+        if (!animal.name || typeof animal.name !== 'string') {
         return false;
     }
     if (!animal.species || typeof animal.species !== 'string') {
@@ -84,7 +82,7 @@ var validateAnimal = function (animal) {
     if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
         return false;
     }
-
+    
     return true;
 }
 
@@ -108,11 +106,31 @@ app.get('/api/animals/:id', (req, res) => {
 app.post('/api/animals', (req, res) => {
     // set id to be one greater than the database length
     req.body.id = animals.length.toString();
-
+    
     if (!validateAnimal(req.body)) {
         res.status(400).send('The animal is not properly formatted.');
     } else {
         const animal = createNewAnimal(req.body, animals);
         res.json(animal);
     }
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+app.get('/animals', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/animals.html'))
+});
+
+app.get('/zookeepers', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/zookeepers.html'))
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'))
+});
+
+app.listen(PORT, () => {
+    console.log(`API server now on port ${PORT}!`);
 });
