@@ -46,10 +46,10 @@ var filterByQuery = function (query, animalsArray) {
     return filteredResults;
   }
 
-app.get('/api/animals', (req, res) => {
+  app.get('/api/animals', (req, res) => {
     let results = animals;
     if (req.query) {
-        results = filterByQuery(req.query, results);
+      results = filterByQuery(req.query, results);
     }
     res.json(results);
-});
+  });
